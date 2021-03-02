@@ -13,6 +13,15 @@ class MessagingServer:
         self.socket.bind((self.ip_address, self.port))
 
 
+    def handle_client(client_conn, client_addr):
+        # We need to decided if we want to do UDP or TCP
+
+        #TODO: Add messaging support for TCP or UDP
+
+        print(f"client ({client_addr} connected)")
+
+
+
     def startUp(self):
         self.socket.listen(5)
         while True:
