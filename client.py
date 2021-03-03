@@ -6,7 +6,7 @@ class MessagingClient:
         self.name = socket.gethostname()
         self.ip_address = socket.gethostbyname(self.name)
 
-        self.port = 50001
+        self.port = 50002
 
         self.client_addr = (self.ip_address, self.port)
 
@@ -44,7 +44,7 @@ class MessagingClient:
 def main():
 
     clientSocket = MessagingClient()
-    clientSocket.connect("10.104.65.5")
+    clientSocket.connect(("10.104.65.5", 50001))
     clientSocket.message("test")
 
     control = True

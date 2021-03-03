@@ -1,16 +1,20 @@
 import socket
 import threading
 
+
 class MessagingServer:
     def __init__(self): # Initialize the server
         self.name = socket.gethostname()
         self.ip_address = socket.gethostbyname(self.name)
 
-        self.port = 50001
+
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        self.socket.bind((self.ip_address, self.port))
+        self.socket.bind((self.ip_address, 0))
+
+        self.port = socket.socket.getsockname(self.socket)[1]
+
 
 
     def handle_client(client_conn, client_addr):
@@ -31,7 +35,7 @@ class MessagingServer:
             print(f"Active clients: {threading.activeCount() - 1}")
 
 
-
+'''
 def main(): #Delete later
     print("Hello World!")
 
@@ -47,3 +51,4 @@ def main(): #Delete later
 
 if __name__ == "__main__": # Also Delete later
     main()
+'''
