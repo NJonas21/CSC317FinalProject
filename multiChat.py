@@ -21,7 +21,7 @@ class MultiChat(server.MessagingServer):
 
 
     def createServer(self, name):
-        self.rooms[name] = MessagingServer()
+        self.rooms[name] = server.MessagingServer()
 
 
     def handle_connection(self, client_conn, client_addr):
@@ -32,9 +32,9 @@ class MultiChat(server.MessagingServer):
             while True:
                 name = str(self.socket.recv(10)) # Limit group name sizes on client?
                 if name not in self.room.keys():
-                    createServer(self, name)
-                    print(f"{name}, {self.room[name]}")
-                    tempServer = str(self.room[name])
+                    self.createServer(name)
+                    print(f"{name}, {self.rooms[name]}")
+                    tempServer = str(self.rooms[name])
                     tempServerSize = len(tempServer.encode("utf-8"))
                     self.socket.send(str(tempServerSize).encode("utf-8"))
                     time.sleep(1)
@@ -47,13 +47,13 @@ class MultiChat(server.MessagingServer):
         elif choice == "join":
             print("join")
             if len(self.rooms) == 0:
-                createServer(self, "default")
-                print(f"default, {self.room['default']}")
-                tempServer = str(self.room["default"])
+                self.createServer("default")
+                print(f"default, {self.rooms['default']}")
+                tempServer = f"{self.rooms['default'].ip_address},{self.rooms['default'].port}"
                 tempServerSize = len(tempServer.encode("utf-8"))
-                self.socket.send(str(tempServerSize).encode("utf-8"))
+                client_conn.send(str(tempServerSize).encode("utf-8"))
                 time.sleep(1)
-                self.socket.send(tempServer)
+                client_conn.send(tempServer.encode("utf-8"))
 
                 client_conn.close() # Close off the client from this server
                 # Client should then use server information to connect to default connection
