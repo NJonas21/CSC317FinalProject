@@ -15,6 +15,8 @@ class MultiChat(server.MessagingServer):
 
         self.socket.bind((self.ip_address, self.port))
 
+        print("bound")
+
         self.rooms = {}
 
 
@@ -23,7 +25,7 @@ class MultiChat(server.MessagingServer):
 
 
     def handle_connection(self, client_conn, client_addr):
-        choice = self.socket.recv(5).decode("utf-8")
+        choice = client_conn.recv(5).decode("utf-8")
 
         if choice == "create":
             print("create")
@@ -62,7 +64,7 @@ class MultiChat(server.MessagingServer):
                 max_str = -1
                 for i in self.rooms.keys(): # Grab the max string size used in the room names
                     if max_str < len(i):
-                        max_str() = len(i)
+                        max_str = len(i)
 
                 self.socket.send(str(keys_length).encode("utf-8"))
                 time.sleep(1)
@@ -86,7 +88,9 @@ class MultiChat(server.MessagingServer):
         self.socket.listen(5)
         while working:
             client_conn, client_addr = self.socket.accept()
-            thread = threading.Thread(target=handle_connection, args = (client_conn, client_addr))
+            print("Accepted")
+            print(f"{client_conn}, {client_addr}")
+            thread = threading.Thread(target=self.handle_connection, args = (client_conn, client_addr))
             thread.start()
             print(f"Active clients: {threading.activeCount() - 1}")
 
@@ -95,6 +99,9 @@ def main():
     print("Hello World!")
 
     multiChatSocket = MultiChat()
+
+    print(multiChatSocket.ip_address)
+    print(multiChatSocket.port)
 
     multiChatSocket.startChats()
 
