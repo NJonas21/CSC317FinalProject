@@ -38,7 +38,6 @@ class MessagingClient:
         responseSizeInt = int(responseSizeStr)
         response = self.client_socket.recv(responseSizeInt).decode("utf-8")
 
-        print(response) #For Testing
         return response
 
     def diconnect(self):
@@ -48,7 +47,11 @@ def main():
 
     clientSocket = MessagingClient()
     clientSocket.connect("10.104.65.5")
-    clientSocket.message("join")
+    time.sleep(1)
+    clientSocket.message("create")
+    clientSocket.message("another")
+    response = clientSocket.receive()
+    print(f"response = {response}")
 
     control = True
     while control:

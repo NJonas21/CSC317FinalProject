@@ -25,20 +25,23 @@ class MultiChat(server.MessagingServer):
 
 
     def handle_connection(self, client_conn, client_addr):
-        choice = client_conn.recv(5).decode("utf-8")
+        choice = client_conn.recv(6).decode("utf-8")
+        print(f"choice = {choice}")
 
         if choice == "create":
             print("create")
             while True:
-                name = str(self.socket.recv(10)) # Limit group name sizes on client?
-                if name not in self.room.keys():
+                print(self.rooms)
+                name = str(client_conn.recv(10).decode("utf-8")) # Limit group name sizes on client?
+                print(f"name = {name}")
+                if name not in self.rooms.keys():
                     self.createServer(name)
                     print(f"{name}, {self.rooms[name]}")
-                    tempServer = str(self.rooms[name])
-                    tempServerSize = len(tempServer.encode("utf-8"))
-                    self.socket.send(str(tempServerSize).encode("utf-8"))
+                    tempServer = f"{self.rooms[name].ip_address},{self.rooms[name].port}".encode("utf-8")
+                    tempServerSize = len(tempServer)
+                    client_conn.send(str(tempServerSize).encode("utf-8"))
                     time.sleep(1)
-                    self.socket.send(tempServer)
+                    client_conn.send(tempServer)
 
                     client_conn.close() # Close off the client from this server
                     # Client should then use server information to connect to other connection
@@ -88,11 +91,12 @@ class MultiChat(server.MessagingServer):
         self.socket.listen(5)
         while working:
             client_conn, client_addr = self.socket.accept()
+            print(self.rooms)
             print("Accepted")
-            print(f"{client_conn}, {client_addr}")
             thread = threading.Thread(target=self.handle_connection, args = (client_conn, client_addr))
             thread.start()
             print(f"Active clients: {threading.activeCount() - 1}")
+
 
 
 def main():
