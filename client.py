@@ -10,6 +10,8 @@ class MessagingClient:
         self.name = username
         self.client_addr = (self.ip_address, self.port)
 
+        self.last_msg = ""
+
     def connect(self, server_ip, server_port):
         self.server_addr = (server_ip, server_port)
 
@@ -88,17 +90,22 @@ class MessagingClient:
 
         connectBool = True
         while connectBool:
-            message = input('To whisper type !whisper then the message then the user(e.g. !whisper [message]->[user])\n').split('->')
+            message = input('To whisper type !whisper then the message then the user(e.g. !whisper [message]->[user])\n') #.split('->')
             print(message)
-            if message[0] == "!disconnect":
-                packet = self.name + ":" + message[0] + ':' + ''
-                connectBool = False
-            else:
-                command = message[0].split(' ')
-                if command[0] == "!whisper":
-                    packet = self.name + ':' + message[0][8:] + ':' + message[1].strip()
+            if message[0] == "!":
+                message = message.split("->")
+                if message[0] == "!disconnect":
+                    packet = self.name + ":" + message[0] + ':' + ''
+                    connectBool = False
                 else:
-                    continue
+                    command = message[0].split(' ')
+                    if command[0] == "!whisper":
+                        packet = self.name + ':' + message[0][8:] + ':' + message[1].strip()
+                    else:
+                        continue
+            else:
+                packet = self.name + ":" + message + ":" + ""
+                self.last_msg = self.name + ":" + message
             encoded_packet = packet.encode("utf-8")
 
             self.client_socket.send(encoded_packet)
@@ -109,7 +116,7 @@ class MessagingClient:
             try:
                 response = self.client_socket.recv(1024)
 
-                if response:
+                if response.decode("utf-8") != self.last_msg:
                     print(response.decode("utf-8"))
             except:
                 break
@@ -128,7 +135,7 @@ def main():
     username = input("Please input username: ")
 
     client = MessagingClient(username)
-    client.run("192.168.1.17", 50001)
+    client.run("10.104.65.5", 50001)
 
 
 

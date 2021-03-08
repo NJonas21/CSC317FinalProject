@@ -57,6 +57,9 @@ class MessagingServer:
             elif message == self.disconnect_message:
                 print("disconnect message here")
                 break
+            elif message != self.disconnect_message and forward_user == "":
+                forward_user = ",".join(self.client_socket_info.keys())
+
 
             print(client_name, ':', message, 'to', forward_user)
             self.unsent_message.append((client_name, message, forward_user))
