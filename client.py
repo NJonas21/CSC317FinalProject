@@ -91,7 +91,6 @@ class MessagingClient:
         connectBool = True
         while connectBool:
             message = input('To whisper type !whisper then the message then the user(e.g. !whisper [message]->[user])\n') #.split('->')
-            print(message)
             if message[0] == "!":
                 message = message.split("->")
                 if message[0] == "!disconnect":
