@@ -11,6 +11,8 @@ class MessagingServer:
         self.ip_address = socket.gethostbyname(self.name)
         self.port = 0
 
+        self.client_count = 0
+
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.ip_address, self.port))
 
@@ -35,6 +37,8 @@ class MessagingServer:
         print('\n', f"[NEW CONNECTION] {client_addr} connected.")
         connected = True
 
+        self.client_count += 1
+
         while connected:
 
             packet = client_conn.recv(1024)
@@ -51,6 +55,7 @@ class MessagingServer:
                 client_conn.send(self.print_online_user().encode('utf-8'))
                 continue
             elif message == self.disconnect_message:
+                print("disconnect message here")
                 break
 
             print(client_name, ':', message, 'to', forward_user)
@@ -60,6 +65,9 @@ class MessagingServer:
         self.client_socket_info.pop(client_name, None)
 
         print(f"[DISCONNECTION] {client_addr} disconnected.")
+        self.client_count = self.client_count - 1
+        if self.client_count == 0:
+            self.socket.close()
 
     def send_message(self):
 
@@ -98,14 +106,16 @@ class MessagingServer:
         thread_send.start()
 
         while True:
-
-            client_conn, client_addr = self.socket.accept()
+            try:
+                client_conn, client_addr = self.socket.accept()
 
             #start_new_thread(self.handle_client, (client_conn, client_addr))
             #threading.Thread(target=self.handle_client, args = (client_conn, client_addr)).start()
 
-            thread_receive = threading.Thread(target=self.receive_message, args = (client_conn, client_addr))
-            thread_receive.start()
+                thread_receive = threading.Thread(target=self.receive_message, args = (client_conn, client_addr))
+                thread_receive.start()
+            except:
+                break
 
             #thread.join()  join makes second thread unable.
         self.socket.close()

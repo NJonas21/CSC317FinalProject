@@ -68,8 +68,6 @@ class MessagingClient:
 
         self.disconnect()
 
-        print("disconnected")
-
         print(chat_addr)
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         chat_addr_split = chat_addr.split(",")
@@ -88,9 +86,15 @@ class MessagingClient:
 
     def message(self, message='', user=''):
 
-        while True:
+        connectBool = True
+        while connectBool:
             message = input('Type messaging text and forward user here....(e.g. text->name)\n').split('->')
-            packet = self.name + ':' + message[0] + ':' + message[1].strip()
+            print(message)
+            if message[0] == "!disconnect":
+                packet = self.name + ":" + message[0] + ':' + ''
+                connectBool = False
+            else:
+                packet = self.name + ':' + message[0] + ':' + message[1].strip()
             encoded_packet = packet.encode("utf-8")
 
             self.client_socket.send(encoded_packet)
@@ -98,10 +102,13 @@ class MessagingClient:
     def receive(self):
 
         while True:
-            response = self.client_socket.recv(1024)
+            try:
+                response = self.client_socket.recv(1024)
 
-            if response:
-                print(response.decode("utf-8"))
+                if response:
+                    print(response.decode("utf-8"))
+            except:
+                break
 
     def disconnect(self):
         self.client_socket.close()
@@ -111,6 +118,7 @@ class MessagingClient:
 
         threading.Thread(target=self.receive).start()
         self.message()
+        self.disconnect()
 
 def main():
     username = input("Please input username: ")

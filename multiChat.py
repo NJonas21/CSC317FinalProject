@@ -23,8 +23,13 @@ class MultiChat(server.MessagingServer):
     def createServer(self, name):
         self.rooms[name] = server.MessagingServer()
 
+    def heartBeat(self):
+        self.rooms = {k:v for (k,v) in self.rooms.items() if self.rooms[k].client_count != 0}
+
 
     def handle_connection(self, client_conn, client_addr):
+        if len(self.rooms) > 0:
+            self.heartBeat()
         choice = client_conn.recv(6).decode("utf-8")
         print(f"choice = {choice}")
         print(self.rooms)
@@ -78,7 +83,7 @@ class MultiChat(server.MessagingServer):
                     if max_str < len(i):
                         max_str = len(i)
                 name = client_conn.recv(max_str).decode("utf-8") # Receive choice
-                time.sleep(1)
+                time.sleep(1 )
                 tempServer = f"{self.rooms[name].ip_address},{self.rooms[name].port}" # Find the server of choice
                 temp_server_enc = tempServer.encode("utf-8")
                 tempServerSize = len(temp_server_enc)
@@ -95,7 +100,7 @@ class MultiChat(server.MessagingServer):
     def startChats(self):
 
         working = True
-        self.socket.listen(5)
+        self.socket.listen()
         while working:
             client_conn, client_addr = self.socket.accept()
             print(self.rooms)
