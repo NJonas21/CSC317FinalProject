@@ -114,6 +114,9 @@ class MultiChat(server.MessagingServer):
         while self.working:
             try:
                 client_conn, client_addr = self.socket.accept()
+                print("found one")
+                client_conn.close()
+                client_conn, client_addr = self.socket.accept()
                 print(self.rooms)
                 print("Accepted")
                 thread = threading.Thread(target=self.handle_connection, args = (client_conn, client_addr))

@@ -1,22 +1,20 @@
 import socket
 import time
 import threading
+import nmap
 
 class MessagingClient:
     def __init__(self, username): #Initializes Client
         self.ip_address = socket.gethostbyname(socket.gethostname())
         self.port = 10001
+        self.server_port = 50001
 
         self.name = username
         self.client_addr = (self.ip_address, self.port)
-
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.last_msg = ""
 
-    def connect(self, server_ip, server_port):
-        self.server_addr = (server_ip, server_port)
-
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect(self.server_addr)
+    def connect(self):
 
         connectBool = True
         while connectBool:
@@ -123,18 +121,42 @@ class MessagingClient:
     def disconnect(self):
         self.client_socket.close()
 
-    def run(self, server_ip, server_port):
-        self.connect(server_ip, server_port)
+    def run(self):
+        self.connect()
 
         threading.Thread(target=self.receive).start()
         self.message()
         self.disconnect()
 
+    def networkScan(self):
+        nm = nmap.PortScanner()
+        network = self.ip_address + "/24"
+
+        nm.scan(hosts = network, arguments = "-sn")
+        host_list = [(x, nm[x]["status"]["state"]) for x in nm.all_hosts()]
+        for host, status in host_list:
+            print(f"Trying {host}")
+            self.server_addr = (host, self.server_port)
+            self.client_socket.settimeout(1)
+            check = self.client_socket.connect_ex(self.server_addr)
+            self.client_socket.settimeout(None)
+            self.client_socket.close()
+            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            if check == 0:
+                print("successful")
+
+                self.client_socket.connect(self.server_addr)
+
+                break
+
+
 def main():
     username = input("Please input username: ")
 
     client = MessagingClient(username)
-    client.run("10.104.65.5", 50001)
+    client.networkScan()
+    client.run()
 
 
 
