@@ -3,8 +3,9 @@ import socket
 import threading
 import time
 
+
 class MessagingServer:
-    def __init__(self): # Initialize the server
+    def __init__(self):  # Initialize the server
         self.name = socket.gethostname()
         self.disconnect_message = '!disconnect'
 
@@ -18,10 +19,10 @@ class MessagingServer:
 
         self.port = self.socket.getsockname()[1]
 
-        self.client_address_info = {} # key: username, value: address
+        self.client_address_info = {}  # key: username, value: address
         self.client_socket_info = {}  # key: username, value: socket
 
-        self.unsent_message = [] # key: (sender, message, receiver)
+        self.unsent_message = []  # key: (sender, message, receiver)
 
         self.is_working = True
 
@@ -60,7 +61,6 @@ class MessagingServer:
             elif message != self.disconnect_message and forward_user == "":
                 forward_user = ",".join(self.client_socket_info.keys())
 
-
             print(client_name, ':', message, 'to', forward_user)
             self.unsent_message.append((client_name, message, forward_user))
 
@@ -85,10 +85,6 @@ class MessagingServer:
 
                     entire_message = sender + ':' + message
 
-                     #conn = self.client_socket_info[receivers]
-                     #print(entire_message)
-                     #conn.send(entire_message.encode('utf-8'))
-
                     # for multiple forward users
                     for i in receivers.split(','):
                         conn = self.client_socket_info[i]
@@ -112,16 +108,12 @@ class MessagingServer:
             try:
                 client_conn, client_addr = self.socket.accept()
 
-            #start_new_thread(self.handle_client, (client_conn, client_addr))
-            #threading.Thread(target=self.handle_client, args = (client_conn, client_addr)).start()
-
-                thread_receive = threading.Thread(target=self.receive_message, args = (client_conn, client_addr))
+                thread_receive = threading.Thread(target=self.receive_message, args=(client_conn, client_addr))
                 thread_receive.start()
                 print("hello")
             except:
                 break
 
-            #thread.join()  join makes second thread unable.
         self.socket.close()
 
 

@@ -1,10 +1,10 @@
 import socket
-import time
 import threading
 import nmap
 
+
 class MessagingClient:
-    def __init__(self, username): #Initializes Client
+    def __init__(self, username):  # Initializes Client
         self.ip_address = socket.gethostbyname(socket.gethostname())
         self.port = 10001
         self.server_port = 50001
@@ -16,47 +16,47 @@ class MessagingClient:
 
     def connect(self):
 
-        connectBool = True
-        while connectBool:
+        connect_bool = True
+        while connect_bool:
             choice = input("Would you like to join or create a chat?")
-
 
             if choice == "join":
                 self.client_socket.send(choice.encode("utf-8"))
 
-                listSize = int(self.client_socket.recv(5).decode("utf-8"))
+                list_size = int(self.client_socket.recv(5).decode("utf-8"))
 
-                chatList = self.client_socket.recv(listSize).decode("utf-8")
-                if len(chatList) == 0:
+                chat_list = self.client_socket.recv(list_size).decode("utf-8")
+                if len(chat_list) == 0:
                     print("receiving default server...")
-                    connectBool = False
+                    connect_bool = False
                 else:
-                    chatList.split(",")
-                    print(chatList)
+                    chat_list.split(",")
+                    print(chat_list)
                     while True:
-                        chatChoice = input("Choose a server from the list: ")
-                        if chatChoice in chatList:
-                            self.client_socket.send(chatChoice.encode("utf-8"))
+                        chat_choice = input("Choose a server from the list: ")
+                        if chat_choice in chat_list:
+                            self.client_socket.send(chat_choice.encode("utf-8"))
                             break
                         else:
                             print("Choose a valid name.")
-                connectBool = False
+                connect_bool = False
+
             elif choice == "create":
                 self.client_socket.send(choice.encode("utf-8"))
 
-                listSize = int(self.client_socket.recv(5).decode("utf-8"))
+                list_size = int(self.client_socket.recv(5).decode("utf-8"))
 
-                chatList = self.client_socket.recv(listSize).decode("utf-8")
-                chatList.split(",")
-                print(chatList)
+                chat_list = self.client_socket.recv(list_size).decode("utf-8")
+                chat_list.split(",")
+                print(chat_list)
                 while True:
-                    chatChoice = input("Choose a name for your server that isn't already taken: ")
-                    if chatChoice not in chatList:
-                        self.client_socket.send(chatChoice.encode("utf-8"))
+                    chat_choice = input("Choose a name for your server that isn't already taken: ")
+                    if chat_choice not in chat_list:
+                        self.client_socket.send(chat_choice.encode("utf-8"))
                         break
                     else:
                         print("choose a valid name.")
-                connectBool = False
+                connect_bool = False
             else:
                 print("Not a valid option, please choose either 'create' or 'join'")
         print("While loop passed")
@@ -84,16 +84,17 @@ class MessagingClient:
 
         self.client_socket.send(encoded_packet)
 
-    def message(self, message='', user=''):
+    def message(self):
 
-        connectBool = True
-        while connectBool:
-            message = input('To whisper type !whisper then the message then the user(e.g. !whisper [message]->[user])\n') #.split('->')
+        connect_bool = True
+        while connect_bool:
+            message = input(
+                'To whisper type !whisper then the message then the user(e.g. !whisper [message]->[user])\n')
             if message[0] == "!":
                 message = message.split("->")
                 if message[0] == "!disconnect":
                     packet = self.name + ":" + message[0] + ':' + ''
-                    connectBool = False
+                    connect_bool = False
                 else:
                     command = message[0].split(' ')
                     if command[0] == "!whisper":
@@ -108,7 +109,7 @@ class MessagingClient:
                 self.client_socket.send(encoded_packet)
             except:
                 print("While loop stopped")
-                connectBool = False
+                connect_bool = False
 
     def receive(self):
 
@@ -131,11 +132,11 @@ class MessagingClient:
         self.message()
         self.disconnect()
 
-    def networkScan(self):
+    def network_scan(self):
         nm = nmap.PortScanner()
         network = self.ip_address + "/24"
 
-        nm.scan(hosts = network, arguments = "-sn")
+        nm.scan(hosts=network, arguments="-sn")
         host_list = [(x, nm[x]["status"]["state"]) for x in nm.all_hosts()]
         for host, status in host_list:
             print(f"Trying {host}")
@@ -158,9 +159,8 @@ def main():
     username = input("Please input username: ")
 
     client = MessagingClient(username)
-    client.networkScan()
+    client.network_scan()
     client.run()
-
 
 
 if __name__ == "__main__":
