@@ -102,7 +102,7 @@ class MessagingServer:
             time.sleep(3)
 
     def run(self):
-        self.socket.listen(5)
+        self.socket.listen()
         print(f"[LISTENING] Server is listening on {self.ip_address}")
 
         thread_send = threading.Thread(target=self.send_message)
@@ -117,6 +117,7 @@ class MessagingServer:
 
                 thread_receive = threading.Thread(target=self.receive_message, args = (client_conn, client_addr))
                 thread_receive.start()
+                print("hello")
             except:
                 break
 

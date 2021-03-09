@@ -17,6 +17,8 @@ class MultiChat(server.MessagingServer):
 
         print("bound")
 
+        self.working = True
+
         self.rooms = {}
 
 
@@ -41,7 +43,7 @@ class MultiChat(server.MessagingServer):
         client_conn.send(keys_enc)
         if choice == "create":
             print("create")
-            while True:
+            while self.working:
                 name = str(client_conn.recv(15).decode("utf-8")) # Limit group name sizes on client?
                 print(f"name = {name}")
                 print(self.rooms.keys())
@@ -95,20 +97,33 @@ class MultiChat(server.MessagingServer):
 
                 self.rooms[name].run()
 
-
+    def commandLine(self):
+        while self.working:
+            command = input("\n")
+            if command == "!quit":
+                self.disconnect()
+                self.working = False
+                for k in self.rooms.keys():
+                    self.rooms[k].socket.close()
+                print("Closed")
+            else:
+                print("Invalid command")
 
     def startChats(self):
-
-        working = True
         self.socket.listen()
-        while working:
-            client_conn, client_addr = self.socket.accept()
-            print(self.rooms)
-            print("Accepted")
-            thread = threading.Thread(target=self.handle_connection, args = (client_conn, client_addr))
-            thread.start()
-            print(f"Active clients: {threading.activeCount() - 1}")
+        while self.working:
+            try:
+                client_conn, client_addr = self.socket.accept()
+                print(self.rooms)
+                print("Accepted")
+                thread = threading.Thread(target=self.handle_connection, args = (client_conn, client_addr))
+                thread.start()
+                print(f"Active clients: {threading.activeCount() - 1}")
+            except:
+                break
 
+    def disconnect(self):
+        self.socket.close()
 
 
 def main():
@@ -118,8 +133,10 @@ def main():
 
     print(multiChatSocket.ip_address)
     print(multiChatSocket.port)
-
-    multiChatSocket.startChats()
+    threadCmdLine = threading.Thread(target = multiChatSocket.commandLine)
+    threadCmdLine.start()
+    thread = threading.Thread(target = multiChatSocket.startChats)
+    thread.start()
 
 
 if __name__ == "__main__":
