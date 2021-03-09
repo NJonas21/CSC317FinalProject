@@ -23,6 +23,8 @@ class MessagingServer:
 
         self.unsent_message = [] # key: (sender, message, receiver)
 
+        self.is_working = True
+
     def print_online_user(self):
         info = [str(u) + ' is online.\n' for u in self.client_address_info.keys()]
 
@@ -35,11 +37,9 @@ class MessagingServer:
     def receive_message(self, client_conn, client_addr):
 
         print('\n', f"[NEW CONNECTION] {client_addr} connected.")
-        connected = True
-
         self.client_count += 1
 
-        while connected:
+        while self.is_working:
 
             packet = client_conn.recv(1024)
 
@@ -76,7 +76,7 @@ class MessagingServer:
 
         print("\n [SENDING_MESSAGE] works. \n")
         # Check if socket still connected #
-        while True:
+        while self.is_working:
 
             for packet in self.unsent_message:
                 print(f"[CHECKING] {packet}")
@@ -108,7 +108,7 @@ class MessagingServer:
         thread_send = threading.Thread(target=self.send_message)
         thread_send.start()
 
-        while True:
+        while self.is_working:
             try:
                 client_conn, client_addr = self.socket.accept()
 

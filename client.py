@@ -104,17 +104,20 @@ class MessagingClient:
                 packet = self.name + ":" + message + ":" + ""
                 self.last_msg = self.name + ":" + message
             encoded_packet = packet.encode("utf-8")
-
-            self.client_socket.send(encoded_packet)
+            try:
+                self.client_socket.send(encoded_packet)
+            except:
+                print("While loop stopped")
+                connectBool = False
 
     def receive(self):
 
         while True:
             try:
                 response = self.client_socket.recv(1024)
-
-                if response.decode("utf-8") != self.last_msg:
-                    print(response.decode("utf-8"))
+                if response:
+                    if response.decode("utf-8") != self.last_msg:
+                        print(response.decode("utf-8"))
             except:
                 break
 

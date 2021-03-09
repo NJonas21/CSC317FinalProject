@@ -26,6 +26,10 @@ class MultiChat(server.MessagingServer):
         self.rooms[name] = server.MessagingServer()
 
     def heartBeat(self):
+        for k in self.rooms.keys():
+            if self.rooms[k].client_count == 0:
+                self.rooms[k].is_working = False
+
         self.rooms = {k:v for (k,v) in self.rooms.items() if self.rooms[k].client_count != 0}
 
 
@@ -105,6 +109,7 @@ class MultiChat(server.MessagingServer):
                 self.working = False
                 for k in self.rooms.keys():
                     self.rooms[k].socket.close()
+                    self.rooms[k].is_working = False
                 print("Closed")
             else:
                 print("Invalid command")
