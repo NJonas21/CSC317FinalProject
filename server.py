@@ -1,4 +1,4 @@
-
+# Authors: Nick Jonas, Bram Dedrick, Chenxi Liu
 import socket
 import threading
 import time
@@ -36,8 +36,6 @@ class MessagingServer:
         return sentences
 
     def receive_message(self, client_conn, client_addr):
-
-        print('\n', f"[NEW CONNECTION] {client_addr} connected.")
         self.client_count += 1
 
         while self.is_working:
@@ -47,39 +45,31 @@ class MessagingServer:
             data = packet.decode('utf-8').split(':')
             client_name, message, forward_user = data[0], data[1], data[2]
 
-            print(data)
             if message == 'Login':
                 self.client_address_info[client_name] = client_addr
                 self.client_socket_info[client_name] = client_conn
 
-                print('Login!!!')
                 client_conn.send(self.print_online_user().encode('utf-8'))
                 continue
             elif message == self.disconnect_message:
-                print("disconnect message here")
                 break
             elif message != self.disconnect_message and forward_user == "":
                 forward_user = ",".join(self.client_socket_info.keys())
 
-            print(client_name, ':', message, 'to', forward_user)
             self.unsent_message.append((client_name, message, forward_user))
 
         client_conn.close()
         self.client_socket_info.pop(client_name, None)
 
-        print(f"[DISCONNECTION] {client_addr} disconnected.")
         self.client_count = self.client_count - 1
         if self.client_count == 0:
             self.socket.close()
 
     def send_message(self):
-
-        print("\n [SENDING_MESSAGE] works. \n")
         # Check if socket still connected #
         while self.is_working:
 
             for packet in self.unsent_message:
-                print(f"[CHECKING] {packet}")
                 try:
                     sender, message, receivers = packet[0], packet[1], packet[2]
 
@@ -91,15 +81,12 @@ class MessagingServer:
                         conn.send(entire_message.encode('utf-8'))
 
                     self.unsent_message.remove(packet)
-
-                    print("Sending succesful!")
                 except:
                     pass
             time.sleep(3)
 
     def run(self):
         self.socket.listen()
-        print(f"[LISTENING] Server is listening on {self.ip_address}")
 
         thread_send = threading.Thread(target=self.send_message)
         thread_send.start()
@@ -110,7 +97,6 @@ class MessagingServer:
 
                 thread_receive = threading.Thread(target=self.receive_message, args=(client_conn, client_addr))
                 thread_receive.start()
-                print("hello")
             except:
                 break
 
@@ -119,9 +105,4 @@ class MessagingServer:
 
 if __name__ == '__main__':
     server = MessagingServer()
-
-    print(server.ip_address)
-    print(server.port, '\n')
-
-    print("[STARTING] server is starting...")
     server.run()

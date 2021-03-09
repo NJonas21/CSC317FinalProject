@@ -1,3 +1,4 @@
+# Authors: Nick Jonas, Bram Dedrick, Chenxi Liu
 import threading
 import socket
 import time
@@ -15,8 +16,6 @@ class MultiChat(server.MessagingServer):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.socket.bind((self.ip_address, self.port))
-
-        print("bound")
 
         self.working = True
 
@@ -36,25 +35,16 @@ class MultiChat(server.MessagingServer):
         if len(self.rooms) > 0:
             self.heartBeat()
         choice = client_conn.recv(6).decode("utf-8")
-        print(f"choice = {choice}")
-        print(self.rooms)
         keys = ",".join(self.rooms.keys())
         keys_enc = keys.encode("utf-8")
         keys_length = len(keys_enc)
-        print(f"len = {keys_length}")
         client_conn.send(str(keys_length).encode("utf-8"))
         client_conn.send(keys_enc)
         if choice == "create":
-            print("create")
             while self.working:
                 name = str(client_conn.recv(15).decode("utf-8"))  # Limit group name sizes on client?
-                print(f"name = {name}")
-                print(self.rooms.keys())
                 if name not in self.rooms.keys():
-                    print("True")
                     self.createServer(name)
-                    print("server created")
-                    print(f"{name}, {self.rooms[name].ip_address}, {self.rooms[name].port}")
                     temp_server = f"{self.rooms[name].ip_address},{self.rooms[name].port}".encode("utf-8")
                     temp_server_size = len(temp_server)
                     client_conn.send(str(temp_server_size).encode("utf-8"))
@@ -63,15 +53,12 @@ class MultiChat(server.MessagingServer):
 
                     client_conn.close()  # Close off the client from this server
                     # Client should then use server information to connect to other connection
-                    print("running")
                     self.rooms[name].run()
                     break
 
         elif choice == "join":
-            print("join")
             if len(self.rooms) == 0:
                 self.createServer("default")
-                print(f"default, {self.rooms['default']}")
                 temp_server = f"{self.rooms['default'].ip_address},{self.rooms['default'].port}"
                 temp_server_size = len(temp_server.encode("utf-8"))
                 client_conn.send(str(temp_server_size).encode("utf-8"))
@@ -118,14 +105,11 @@ class MultiChat(server.MessagingServer):
         while self.working:
             try:
                 client_conn, client_addr = self.socket.accept()
-                print("found one")
                 client_conn.close()
                 client_conn, client_addr = self.socket.accept()
                 print(self.rooms)
-                print("Accepted")
                 thread = threading.Thread(target=self.handle_connection, args=(client_conn, client_addr))
                 thread.start()
-                print(f"Active clients: {threading.activeCount() - 1}")
             except:
                 break
 
@@ -134,8 +118,6 @@ class MultiChat(server.MessagingServer):
 
 
 def main():
-    print("Hello World!")
-
     multi_chat_socket = MultiChat()
 
     print(multi_chat_socket.ip_address)

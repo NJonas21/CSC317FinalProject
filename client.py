@@ -1,3 +1,4 @@
+# Authors: Nick Jonas, Bram Dedrick, Chenxi Liu
 import socket
 import threading
 import nmap
@@ -59,10 +60,7 @@ class MessagingClient:
                 connect_bool = False
             else:
                 print("Not a valid option, please choose either 'create' or 'join'")
-        print("While loop passed")
         chat_addr_size = int(self.client_socket.recv(5).decode("utf-8"))
-
-        print("size received")
 
         chat_addr = self.client_socket.recv(chat_addr_size).decode("utf-8")
 
@@ -75,10 +73,8 @@ class MessagingClient:
         self.client_socket.connect((chat_addr_split[0], int(chat_addr_split[1])))
 
         self.login()
-        print("[Login] Login succeedes.\n")
 
     def login(self):
-        print("Logging in")
         packet = self.name + ':' + 'Login' + ':' + ''
         encoded_packet = packet.encode("utf-8")
 
@@ -108,7 +104,6 @@ class MessagingClient:
             try:
                 self.client_socket.send(encoded_packet)
             except:
-                print("While loop stopped")
                 connect_bool = False
 
     def receive(self):
@@ -139,7 +134,6 @@ class MessagingClient:
         nm.scan(hosts=network, arguments="-sn")
         host_list = [(x, nm[x]["status"]["state"]) for x in nm.all_hosts()]
         for host, status in host_list:
-            print(f"Trying {host}")
             self.server_addr = (host, self.server_port)
             self.client_socket.settimeout(1)
             check = self.client_socket.connect_ex(self.server_addr)
@@ -148,8 +142,6 @@ class MessagingClient:
             self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
             if check == 0:
-                print("successful")
-
                 self.client_socket.connect(self.server_addr)
 
                 break
