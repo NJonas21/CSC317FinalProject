@@ -26,19 +26,22 @@ class MessagingClient:
 
                 list_size = int(self.client_socket.recv(5).decode("utf-8"))
 
-                chat_list = self.client_socket.recv(list_size).decode("utf-8")
-                if len(chat_list) == 0:
+                chat_selection = self.client_socket.recv(list_size).decode("utf-8")
+                if len(chat_selection) == 0:
                     print("receiving default server...")
                     connect_bool = False
                 else:
-                    chat_list.split(",")
-                    print(chat_list)
-                    while True:
+                    chat_list = chat_selection.split(",")
+                    print(chat_selection)
+                    list_bool = True
+                    while list_bool:
                         chat_choice = input("Choose a server from the list: ")
-                        if chat_choice in chat_list:
-                            self.client_socket.send(chat_choice.encode("utf-8"))
-                            break
-                        else:
+                        for i in chat_list:
+                            if i == chat_choice:
+                                self.client_socket.send(chat_choice.encode("utf-8"))
+                                list_bool = False
+                                break
+                        if list_bool == True:
                             print("Choose a valid name.")
                 connect_bool = False
 
@@ -66,7 +69,6 @@ class MessagingClient:
 
         self.disconnect()
 
-        print(chat_addr)
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         chat_addr_split = chat_addr.split(",")
 

@@ -31,9 +31,9 @@ class MultiChat(server.MessagingServer):
 
         self.rooms = {k: v for (k, v) in self.rooms.items() if self.rooms[k].client_count != 0}
 
-    def handle_connection(self, client_conn):
+    def handle_connection(self, client_conn, client_addr):
         if len(self.rooms) > 0:
-            self.heartBeat()
+            self.heart_beat()
         choice = client_conn.recv(6).decode("utf-8")
         keys = ",".join(self.rooms.keys())
         keys_enc = keys.encode("utf-8")
@@ -44,7 +44,7 @@ class MultiChat(server.MessagingServer):
             while self.working:
                 name = str(client_conn.recv(15).decode("utf-8"))  # Limit group name sizes on client?
                 if name not in self.rooms.keys():
-                    self.createServer(name)
+                    self.create_server(name)
                     temp_server = f"{self.rooms[name].ip_address},{self.rooms[name].port}".encode("utf-8")
                     temp_server_size = len(temp_server)
                     client_conn.send(str(temp_server_size).encode("utf-8"))
@@ -58,7 +58,7 @@ class MultiChat(server.MessagingServer):
 
         elif choice == "join":
             if len(self.rooms) == 0:
-                self.createServer("default")
+                self.create_server("default")
                 temp_server = f"{self.rooms['default'].ip_address},{self.rooms['default'].port}"
                 temp_server_size = len(temp_server.encode("utf-8"))
                 client_conn.send(str(temp_server_size).encode("utf-8"))

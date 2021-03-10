@@ -52,6 +52,7 @@ class MessagingServer:
                 client_conn.send(self.print_online_user().encode('utf-8'))
                 continue
             elif message == self.disconnect_message:
+                self.client_count = self.client_count - 1
                 break
             elif message != self.disconnect_message and forward_user == "":
                 forward_user = ",".join(self.client_socket_info.keys())
@@ -61,7 +62,7 @@ class MessagingServer:
         client_conn.close()
         self.client_socket_info.pop(client_name, None)
 
-        self.client_count = self.client_count - 1
+
         if self.client_count == 0:
             self.socket.close()
 
